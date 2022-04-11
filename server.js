@@ -37,6 +37,8 @@ app.get('/write', function (req, res) {
     res.sendFile(__dirname + '/write.html');
 });
 
+
+// post FIND ALL
 app.get('/list', function (req, res) {
     db.collection('post').find().toArray((err, result) => {
         if(err) {
@@ -49,13 +51,24 @@ app.get('/list', function (req, res) {
     
 });
 
-app.post('/add', (req,res) => {
+// poser INSERT
+app.post('/add', (req, res) => {
+    
+    db.collection('postIndex').findOne({ name: 'postCnt' }, (err, result) => {
+        const postCounter = result.totalPost;
+
+        db.collection('post').insertOne(
+            { _id: postCounter+1 , 제목: req.body.title, 날짜: req.body.date },
+            (err, res) => {
+                if (err) return console.log(err);
+
+                db.collection('postIndex').updateOne({name : 'postCnt'},{$inc : {totalPost : 1}}, (err,result)=>{
+                    if(err) return console.log(err);
+                });
+                console.log('\n게시물이 저장되었습니다.\n');
+            })
+    });
+
     res.send('전송완료');
-    db.collection('post').insertOne(
-        { 제목: req.body.title, 날짜: req.body.date },
-         (err, res) => {
-        if(err) return console.log(err);
-        console.log(res.ops);
-    })
 });
 
