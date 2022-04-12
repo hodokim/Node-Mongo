@@ -51,7 +51,7 @@ app.get('/list', function (req, res) {
     
 });
 
-// poser INSERT
+// post INSERT
 app.post('/add', (req, res) => {
     
     db.collection('postIndex').findOne({ name: 'postCnt' }, (err, result) => {
@@ -72,3 +72,11 @@ app.post('/add', (req, res) => {
     res.send('전송완료');
 });
 
+// post DELETE
+app.delete('/delete',(req,res)=> {
+    const id = parseInt(req.body._id);
+    db.collection('post').deleteOne({_id : id },(err,result)=>{
+       if(err) return console.log(err);
+       console.log('삭제 완료되었습니다.');
+    });
+});
