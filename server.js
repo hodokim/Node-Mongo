@@ -78,5 +78,19 @@ app.delete('/delete',(req,res)=> {
     db.collection('post').deleteOne({_id : id },(err,result)=>{
        if(err) return console.log(err);
        console.log('삭제 완료되었습니다.');
+       res.status(200).send({message : '삭제 완료되었습니다.'});
     });
+});
+
+//상세 페이지
+app.get('/detail/:id', function(req, res){
+    db.collection('post').findOne({_id : parseInt(req.params.id)}, (err, result)=>{
+        if(result === null) {
+            console.log('잘못된 요청입니다...');
+            res.sendFile(__dirname + '/400error.html');
+        }else{
+            res.render('detail.ejs', { data: result });
+        }         
+    });
+
 });
