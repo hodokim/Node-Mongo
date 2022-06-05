@@ -3,6 +3,10 @@ const app = express();
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended : true}))
 app.set('view engine', 'ejs');
+app.use('/public', express.static('public'));
+
+
+
 
 const MongoClient = require('mongodb').MongoClient;
 let db;
@@ -30,11 +34,11 @@ app.get('/beauty', function (req, res) {
 });
 
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/index.html');
+    res.render('index.ejs');
 });
 
 app.get('/write', function (req, res) {
-    res.sendFile(__dirname + '/write.html');
+    res.render('write.ejs');
 });
 
 
@@ -85,12 +89,11 @@ app.delete('/delete',(req,res)=> {
 //상세 페이지
 app.get('/detail/:id', function(req, res){
     db.collection('post').findOne({_id : parseInt(req.params.id)}, (err, result)=>{
-        if(result === null) {
-            console.log('잘못된 요청입니다...');
+        if(result == null) {
             res.sendFile(__dirname + '/400error.html');
         }else{
             res.render('detail.ejs', { data: result });
-        }         
+        }   
     });
 
 });
