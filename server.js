@@ -5,6 +5,9 @@ app.use(bodyParser.urlencoded({extended : true}))
 app.set('view engine', 'ejs');
 app.use('/public', express.static('public'));
 
+const methodOverride = require('method-override')
+app.use(methodOverride('_method'))
+
 
 
 
@@ -96,4 +99,27 @@ app.get('/detail/:id', function(req, res){
         }   
     });
 
+});
+
+//글 수정 페이지
+app.get('/edit/:id', function (req, res) {
+    db.collection('post').findOne({ _id: parseInt(req.params.id) }, (err, result) => {
+        if (result == null) {
+            res.sendFile(__dirname + '/400error.html');
+        } else {
+            res.render('edit.ejs', { data: result });
+        }
+    });
+
+});
+
+//글 수정 요청
+app.put('/edit', function(req, res){
+    db.collection('post').updateOne(
+        { _id: parseInt(req.body.id)},
+        { $set: { 제목: req.body.title, 내용: req.body.date }}, 
+        (err, result)=>{
+            console.log('수정완료');
+            res.redirect('/list');
+    })
 });
