@@ -123,3 +123,43 @@ app.put('/edit', function(req, res){
             res.redirect('/list');
     })
 });
+
+
+//회원 인증 관련
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
+const session = require('express-session');
+
+app.use(session({secret : 'secretCode', resave : true, saveUninitialized : false}));
+app.use(passport.initialize());
+app.use(passport.session()); 
+
+app.get('/login', (req, res) => {
+    res.render('login.ejs');
+});
+
+app.post('/login', passport.authenticate('local',{
+    failureRedirect : '/fail',
+}), (req, res)=>{
+    res.redirect('/')
+});
+
+passport.use(new LocalStrategy({
+    //usernameField, passwordField 는 유저가 입력한 Id/Pw input태그의 name 속성
+    usernameField: 'id',
+    passwordField: 'pw',
+    session: true,
+    passReqToCallback: false,
+}, function (inputId, inputPw, done) {
+    //console.log(입력한아이디, 입력한비번);
+    db.collection('login').findOne({ id: inputId }, function (에러, 결과) {
+        if (에러) return done(에러)
+
+        if (!결과) return done(null, false, { message: '존재하지않는 아이디요' })
+        if (inputPw == 결과.pw) {
+            return done(null, 결과)
+        } else {
+            return done(null, false, { message: '비번틀렸어요' })
+        }
+    })
+}));
