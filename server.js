@@ -141,8 +141,25 @@ app.get('/login', (req, res) => {
 app.post('/login', passport.authenticate('local',{
     failureRedirect : '/fail',
 }), (req, res)=>{
-    res.redirect('/')
+    res.redirect('/list')
 });
+
+let loginCheck = (req, res, next) => {
+    if (req.user) {
+        next();
+    } else {
+        res.send('로그인 하셔야 합니다.')
+    }
+}
+
+app.get('/mypage', loginCheck, (req, res)=>{
+    console.log(req.user)
+    res.render('mypage.ejs', {userInfo : req.user});
+});
+
+
+
+
 
 passport.use(new LocalStrategy({
     //usernameField, passwordField 는 유저가 입력한 Id/Pw input태그의 name 속성
@@ -151,7 +168,7 @@ passport.use(new LocalStrategy({
     session: true,
     passReqToCallback: false,
 }, function (inputId, inputPw, done) {
-    //console.log(입력한아이디, 입력한비번);
+    console.log(inputId, inputPw);
     db.collection('login').findOne({ id: inputId }, function (에러, 결과) {
         if (에러) return done(에러)
 
@@ -163,3 +180,14 @@ passport.use(new LocalStrategy({
         }
     })
 }));
+
+passport.serializeUser((user, done)=>{
+     done(null, user.id);
+});
+
+passport.deserializeUser((user_id, done) => {
+    db.collection('login').findOne({id : user_id}, (err, result)=>{
+        done(null, { result });
+    }) 
+});
+
