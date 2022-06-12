@@ -8,20 +8,20 @@ app.use('/public', express.static('public'));
 const methodOverride = require('method-override')
 app.use(methodOverride('_method'))
 
+require('dotenv').config()
 
 
 
 const MongoClient = require('mongodb').MongoClient;
 let db;
 MongoClient.connect
-(`mongodb+srv://hodo323:rlaqkgk1@cluster0.go1xq.mongodb.net/
-todoapp?retryWrites=true&w=majority`,
+    (process.env.DB_URL,
  (err, client)=>{
      if(err) return console.log(err);
 
      db = client.db('todoapp');
 
-     app.listen(8080, function () {
+     app.listen(process.env.PORT, function () {
          console.log('\nLISTENING... 8080');
      });
 });
