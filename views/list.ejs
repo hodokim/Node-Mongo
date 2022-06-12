@@ -19,6 +19,21 @@
 
 
 <h4 class="ml-2 my-3 text-center">오늘 뭐하지?</h4>
+<div class="container input-group mb-2">
+    <input class="form-control" id="search_input">
+    <button class="input-group-append btn btn-danger" id="search">검색</button>
+</div>
+<script>
+    const button = document.getElementById("search");
+    const search_click = ()=>{
+        let search_input = document.getElementById('search_input').value;
+        window.location.replace(`/search?content=${search_input}`)
+    }
+
+    button.addEventListener("click", search_click);
+        
+        
+</script>
 <div class="container">
 <ul class="list-group">
     <% for (var i=0; i < posts.length; i++){ %>
