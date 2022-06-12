@@ -152,15 +152,26 @@ let loginCheck = (req, res, next) => {
     }
 }
 
+//마이페이지
 app.get('/mypage', loginCheck, (req, res)=>{
     console.log(req.user)
     res.render('mypage.ejs', {userInfo : req.user});
 });
 
+//작성 글 검색
+app.get('/search', (req, res)=>{
+     let search_input = req.query.content;
+    db.collection('post').find({ 제목: search_input }).toArray((req, result) => {
+         res.render('search.ejs', {posts : result})
+     })
+})
 
 
 
 
+
+
+//회원 인증 관련
 passport.use(new LocalStrategy({
     //usernameField, passwordField 는 유저가 입력한 Id/Pw input태그의 name 속성
     usernameField: 'id',
