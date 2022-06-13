@@ -23,17 +23,7 @@
     <input class="form-control" id="search_input">
     <button class="input-group-append btn btn-danger" id="search">검색</button>
 </div>
-<script>
-    const button = document.getElementById("search");
-    const search_click = ()=>{
-        let search_input = document.getElementById('search_input').value;
-        window.location.replace(`/search?content=${search_input}`)
-    }
 
-    button.addEventListener("click", search_click);
-        
-        
-</script>
 <div class="container">
 <ul class="list-group">
     <% for (var i=0; i < posts.length; i++){ %>
@@ -48,6 +38,15 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.js"></script>
 <script>
+
+
+        
+        const search_click = () => {
+            let search_input = document.getElementById('search_input').value;
+            window.location.replace(`/search?content=${search_input}`)
+        }
+        const button = document.getElementById("search");
+        button.addEventListener("click", search_click);
 
         $('.delete').click(function (e) {
             const postIdx = e.target.dataset.id;

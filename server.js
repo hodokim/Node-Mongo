@@ -161,7 +161,20 @@ app.get('/mypage', loginCheck, (req, res)=>{
 //작성 글 검색
 app.get('/search', (req, res)=>{
      let search_input = req.query.content;
-    db.collection('post').find({ 제목: search_input }).toArray((req, result) => {
+    let search_condition = [
+        {
+            $search: {
+                index: 'searchTitle',
+                text: {
+                    query: search_input,
+                    path: '제목'  // 제목날짜 둘다 찾고 싶으면 ['제목', '날짜']
+                }
+            }
+        }
+    ] 
+    db.collection('post').aggregate(search_condition).toArray((req, result) => {
+    //db.collection('post').find({ 제목: search_input }).toArray((req, result) => {
+        console.log('체크체크 ===>>> '+ result)
          res.render('search.ejs', {posts : result})
      })
 })
