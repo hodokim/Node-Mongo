@@ -26,6 +26,34 @@ MongoClient.connect
      });
 });
 
+//회원 인증 관련
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
+const session = require('express-session');
+
+app.use(session({ secret: 'secretCode', resave: true, saveUninitialized: false }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.get('/login', (req, res) => {
+    res.render('login.ejs');
+});
+
+app.post('/login', passport.authenticate('local', {
+    failureRedirect: '/fail',
+}), (req, res) => {
+    res.redirect('/list')
+});
+
+let loginCheck = (req, res, next) => {
+    if (req.user) {
+        next();
+    } else {
+        res.send('로그인 하셔야 합니다.')
+    }
+}
+
+
 
 
 app.get('/pet', function(req, res){
@@ -60,12 +88,11 @@ app.get('/list', function (req, res) {
 
 // post INSERT
 app.post('/add', (req, res) => {
-    
     db.collection('postIndex').findOne({ name: 'postCnt' }, (err, result) => {
         const postCounter = result.totalPost;
-
+        const add_data = { _id: postCounter + 1, 제목: req.body.title, 날짜: req.body.date, user_id : req.user?.result.id  };
         db.collection('post').insertOne(
-            { _id: postCounter+1 , 제목: req.body.title, 날짜: req.body.date },
+            add_data,
             (err, res) => {
                 if (err) return console.log(err);
 
@@ -125,32 +152,7 @@ app.put('/edit', function(req, res){
 });
 
 
-//회원 인증 관련
-const passport = require('passport');
-const LocalStrategy = require('passport-local');
-const session = require('express-session');
 
-app.use(session({secret : 'secretCode', resave : true, saveUninitialized : false}));
-app.use(passport.initialize());
-app.use(passport.session()); 
-
-app.get('/login', (req, res) => {
-    res.render('login.ejs');
-});
-
-app.post('/login', passport.authenticate('local',{
-    failureRedirect : '/fail',
-}), (req, res)=>{
-    res.redirect('/list')
-});
-
-let loginCheck = (req, res, next) => {
-    if (req.user) {
-        next();
-    } else {
-        res.send('로그인 하셔야 합니다.')
-    }
-}
 
 //마이페이지
 app.get('/mypage', loginCheck, (req, res)=>{
@@ -160,23 +162,35 @@ app.get('/mypage', loginCheck, (req, res)=>{
 
 //작성 글 검색
 app.get('/search', (req, res)=>{
-     let search_input = req.query.content;
+    let search_input = req.query.content;
     let search_condition = [
         {
             $search: {
-                index: 'searchTitle',
+                index: 'titleSearch',
                 text: {
                     query: search_input,
                     path: '제목'  // 제목날짜 둘다 찾고 싶으면 ['제목', '날짜']
                 }
             }
+        },
+        //정렬
+        { $sort: { _id: 1 } },
+        //검색 개수
+        { $limit: 10 },
+        //검색 필터(RDBMS로 예를 들면, 원하는 칼럼만 조회)
+        {
+            $project: {
+                제목: 1,
+                _id: 1,
+                날짜 : 1,
+                score: { $meta: 'searchScore' }
+            }
         }
-    ] 
+    ]
     db.collection('post').aggregate(search_condition).toArray((req, result) => {
-    //db.collection('post').find({ 제목: search_input }).toArray((req, result) => {
-        console.log('체크체크 ===>>> '+ result)
-         res.render('search.ejs', {posts : result})
-     })
+    //db.collection('post').find({ $text: { $search: search_input } }).toArray((req, result) => {
+        res.render('search.ejs', { posts: result })
+    })
 })
 
 
@@ -215,3 +229,14 @@ passport.deserializeUser((user_id, done) => {
     }) 
 });
 
+
+// 회원가입 page 
+app.get('/join', (req,res)=>{
+    res.render('join.ejs');
+})
+
+// 회원가입
+app.post('/register', (req,res)=>{
+    db.collection('login').insertOne({ id : req.body.id, pw : req.body.pw }) 
+    res.redirect('/list');
+})
