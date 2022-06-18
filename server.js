@@ -107,14 +107,14 @@ app.post('/add', (req, res) => {
 });
 
 // post DELETE
-app.delete('/delete',(req,res)=> {
-    const id = parseInt(req.body._id);
-    db.collection('post').deleteOne({_id : id },(err,result)=>{
-       if(err) return console.log(err);
-       console.log('삭제 완료되었습니다.');
-       res.status(200).send({message : '삭제 완료되었습니다.'});
-    });
-});
+// app.delete('/delete',(req,res)=> {
+//     const id = parseInt(req.body._id);
+//     db.collection('post').deleteOne({_id : id },(err,result)=>{
+//        if(err) return console.log(err);
+//        console.log('삭제 완료되었습니다.');
+//        res.status(200).send({message : '삭제 완료되었습니다.'});
+//     });
+// });
 
 //상세 페이지
 app.get('/detail/:id', function(req, res){
@@ -244,12 +244,11 @@ app.post('/register', (req,res)=>{
 // 게시글 삭제
 app.delete('/delete', function (req, res) {
     req.body._id = parseInt(req.body._id);
-    console.log(req)
-    // const delete_data = { _id : req.body._id, user_id : req.user.id}
-    // //req.body에 담겨온 게시물번호를 가진 글을 db에서 찾아서 삭제해주세요
-    // db.collection('post').deleteOne(delete_data, function (에러, 결과) {
-    //     console.log('삭제완료');
-    //     console.log('에러', 에러)
-    //     res.status(200).send({ message: '성공했습니다' });
-    // })
+    const delete_data = { _id: req.body._id, user_id: req.user.result.id }
+    //req.body에 담겨온 게시물번호를 가진 글을 db에서 찾아서 삭제해주세요
+    db.collection('post').deleteOne(delete_data, function (에러, 결과) {
+        console.log('삭제완료');
+        console.log('에러', 에러)
+        res.status(200).send({ message: '성공했습니다' });
+    })
 });
